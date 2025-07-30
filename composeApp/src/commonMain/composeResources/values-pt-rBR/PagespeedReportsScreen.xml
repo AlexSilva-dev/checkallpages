@@ -1,0 +1,13 @@
+<resources>
+    <string name="pagepeed_reports_title">
+        Relatórios do PageSpeed
+    </string>
+
+    <string name="pagespeed_btn_generate_pagespeed_placeholder">
+        exemple.com.br
+    </string>
+
+    <string name="generate_pagespeed_report_btn_generation">
+        Gerar Relatório
+    </string>
+</resources>

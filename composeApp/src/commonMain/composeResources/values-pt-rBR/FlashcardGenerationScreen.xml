@@ -1,0 +1,13 @@
+<resources>
+    <string name="generate_pagepeed_report_title">
+        PageSpeed
+    </string>
+
+    <string name="generate_pagespeed_btn_generate_pagespeed_placeholder">
+        exemple.com.br
+    </string>
+
+    <string name="btn_generation">
+        Gerar
+    </string>
+</resources>

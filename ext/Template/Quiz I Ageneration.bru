@@ -1,0 +1,17 @@
+meta {
+  name: Quiz I Ageneration
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{protocol}}{{domain}}/quiz/ai-create/topic
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "text": "kotlin"
+  }
+}

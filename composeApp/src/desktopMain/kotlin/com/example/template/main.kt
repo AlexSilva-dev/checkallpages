@@ -1,0 +1,16 @@
+package com.example.template
+
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import com.example.template.app.App
+import com.example.template.app.di.initializeKoin
+
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "template",
+    ) {
+        initializeKoin()
+        App()
+    }
+}

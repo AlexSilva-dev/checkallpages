@@ -1,0 +1,13 @@
+<resources>
+    <string name="commonTopicsScreenLabel">
+        Tópicos
+    </string>
+
+    <string name="commonGenerationFlashcardsScreenLabel">
+        Criar Flashcards
+    </string>
+
+    <string name="commonReviewFlashcardsScreenLabel">
+        Revisão de Flashcard
+    </string>
+</resources>

@@ -1,0 +1,13 @@
+<resources>
+    <string name="title_flashcards">
+        Generate Flashcards
+    </string>
+
+    <string name="flashcard_generation_btn_generation_placeholder">
+        What do you want to study today?
+    </string>
+
+    <string name="btn_generation">
+        Create
+    </string>
+</resources>
