@@ -10,6 +10,8 @@ import com.example.template.app.App
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        FileKit.manualFileKitCoreInitialization(this)
+
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 

@@ -1,9 +1,13 @@
 package com.example.template.pagespeed.domain.useCases
 
+import com.example.template.app.utils.UrlUtil
+import com.example.template.pagespeed.Exceptions.ApiKeyNotFoundException
+import com.example.template.pagespeed.domain.entities.ReportResult
 import com.example.template.pagespeed.domain.entities.Url
 import com.example.template.pagespeed.domain.entities.Urlset
 import com.example.template.pagespeed.domain.ports.PagespeedRepository
 import com.example.template.pagespeed.domain.ports.SitemapRepository
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -14,24 +18,23 @@ class GeneratePagespeedReportsUseCase(
 
     /*
      * Função principal para iniciar o processo de geração de relatórios.
-     * @param baseUrlString A URL base do site (ex: "https://www.exemplo.com").
      */
     @OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
     suspend fun execute(baseUrlString: String) {
-        val baseUrl: Url? = parseBaseUrl(baseUrlString)
-        if (baseUrl == null) {
+        val sitemapUrl: Url? = buildUrl(baseUrlString)
+        if (sitemapUrl == null) {
             println("Invalid base URL provided. Aborting report generation.")
             return
         }
 
-        println("Processing base URL: ${baseUrl.toString()}")
+        println("Processing base URL: ${sitemapUrl.toString()}")
 
-        val urlset: Urlset? = getUrlFromSitemap(baseUrl)
+        val urlset: Urlset? = this.getUrlsFromSitemap(sitemapUrl)
         if (urlset == null) throw IllegalStateException("Urlset cannot null")
 
-
-        generateReportsForUrls(
-            urlset
+        this.generateReportsForUrls(
+            urlset = urlset,
+            sitemapUrl = sitemapUrl
         )
 
         println("PageSpeed report generation completed.")
@@ -39,13 +42,9 @@ class GeneratePagespeedReportsUseCase(
 
 
     /*
-     * Padrão de Projeto: Factory Method (implícito)
-     * Embora não seja um Factory Method formal de classe, a função atua como
-     * uma "fábrica" para criar um objeto Url a partir de uma string.
-     * Ela encapsula a lógica de construção, validando e padronizando a criação
-     * de objetos Url a partir de dados brutos (strings).
+     *
      */
-    private fun parseBaseUrl(baseUrlString: String): Url? {
+    private fun buildUrl(baseUrlString: String): Url? {
         val tempParts: List<String> = baseUrlString.split("://")
 
         val protocol: String
@@ -78,11 +77,11 @@ class GeneratePagespeedReportsUseCase(
      * O Repository atua como um DAO, abstraindo a fonte de dados (neste caso,
      * o arquivo XML do sitemap) e fornecendo uma interface limpa para o Use Case.
      */
-    private suspend fun getUrlFromSitemap(sitemapIndexUrl: Url): Urlset? {
-        println("Attempting to retrieve sitemap index from: ${sitemapIndexUrl.toString()}")
+    private suspend fun getUrlsFromSitemap(sitemapIndexUrl: Url): Urlset? {
         return try {
             this.sitemapRepository.getUrlsFromSitemap(url = sitemapIndexUrl)
         } catch (e: Exception) {
+            println(e.message)
             throw Exception("Erro get sitemap page")
         }
     }
@@ -138,17 +137,35 @@ class GeneratePagespeedReportsUseCase(
      * como uma forma simples do Command Pattern, onde a ação de "gerar relatório"
      * é encapsulada em uma chamada que pode ser executada para diferentes URLs.
      */
-    private suspend fun generateReportsForUrls(urlset: Urlset) {
-        var limit: Int = 0
+    @OptIn(ExperimentalTime::class)
+    private suspend fun generateReportsForUrls(
+        urlset: Urlset,
+        sitemapUrl: Url
+    ) {
+        val domain: String = UrlUtil.getDomain(urlset.url.first().loc)
+        val now = Clock.System.now().toString()
+        val filePath: String = "/$domain/${sitemapUrl.path}/$now".replace(".", "-")
+
+        var errorLimit: Int = 0
         urlset.url.forEach { pageUrl ->
-            if (limit>1) {
-                return@forEach
-            }
-            limit = limit.inc()
+            println("Processando: ${pageUrl.loc}")
             try {
-                pagespeedRepository.generateReport(url = pageUrl.loc)
+                val reportResult: ReportResult = pagespeedRepository.generateReport(
+                    url = pageUrl.loc
+                )
+                this.pagespeedRepository.saveReport(
+                    reportResult = reportResult,
+                    dirId = filePath
+                )
+
+            } catch (e: ApiKeyNotFoundException) {
+                throw e
             } catch (e: Exception) {
                 println("Failed to generate report for ${pageUrl}: ${e.message}")
+                println(e.stackTraceToString())
+                errorLimit = errorLimit.inc()
+                println("\n\n$errorLimit")
+                if (errorLimit > (urlset.url.size / 4)) throw e
             }
         }
         println("Report generation finished.")

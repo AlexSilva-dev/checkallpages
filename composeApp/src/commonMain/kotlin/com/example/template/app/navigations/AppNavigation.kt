@@ -1,6 +1,5 @@
 package com.example.template.app.navigations
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.template.app.ui.layouts.MainLayout
 import com.example.template.pagespeed.ui.screens.GeneratePagespeedReportScreen
+import com.example.template.pagespeed.ui.screens.PageSpeedReportScreen
 import kotlin.uuid.ExperimentalUuidApi
 
 
@@ -51,14 +51,14 @@ fun AppNavegation(
                     }
                 )
             }
+        }
 
-            composable(route = Screen.PagespeedReports.route) {
-                MainLayout(
-                    onNavigate = onNavigate,
-                    currentRoute = currentRoute
-                ) {
-                    Column {  }
-                }
+        composable(route = Screen.PagespeedReports.route) {
+            MainLayout(
+                onNavigate = onNavigate,
+                currentRoute = currentRoute
+            ) {
+                PageSpeedReportScreen()
             }
         }
     }

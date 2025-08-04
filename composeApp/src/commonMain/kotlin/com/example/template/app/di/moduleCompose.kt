@@ -17,7 +17,8 @@ val moduleCompose: Module = module {
 
     viewModel {
         GeneratePagespeedReportViewModel(
-            generatePagespeedReportsUseCase = get()
+            generatePagespeedReportsUseCase = get(),
+            settingsDataStore = get(),
         )
     }
 }

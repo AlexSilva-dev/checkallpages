@@ -10,13 +10,20 @@ import com.example.template.app.infrastructure.services.LocaleSettingsService
 import com.example.template.pagespeed.domain.ports.PagespeedRepository
 import com.example.template.pagespeed.domain.ports.SitemapRepository
 import com.example.template.pagespeed.domain.useCases.GeneratePagespeedReportsUseCase
+import com.example.template.pagespeed.domain.useCases.GetDomainPageSpeedReportUseCase
+import com.example.template.pagespeed.domain.useCases.GetReportsPathsUseCase
+import com.example.template.pagespeed.domain.useCases.GetSitemapPathsPageSpeedReportUseCase
+import com.example.template.pagespeed.domain.useCases.OpenReportUseCase
 import com.example.template.pagespeed.infrastructure.dataSources.PagespeedSource
+import com.example.template.pagespeed.infrastructure.dataSources.ReportDataSource
+import com.example.template.pagespeed.infrastructure.dataSources.local.ReportDataSourceLocal
 import com.example.template.pagespeed.infrastructure.dataSources.remote.PagespeedDataSourceImpl
 import com.example.template.pagespeed.infrastructure.repositories.PagespeedRepositoryImpl
 import com.example.template.pagespeed.infrastructure.repositories.SitemapRepositoryImpl
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
+import com.example.template.pagespeed.ui.viewModels.ReportsViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -39,16 +46,55 @@ val moduleShared: Module = module {
         }
     }
 
+    single {
+        OpenReportUseCase(
+            pagespeedRepository = get()
+        )
+    }
+
+    single {
+        GetReportsPathsUseCase(
+            pagespeedRepository = get()
+        )
+    }
+
+    single {
+        GetSitemapPathsPageSpeedReportUseCase(
+            pagespeedRepository = get()
+        )
+    }
+
+    single {
+        GetDomainPageSpeedReportUseCase(
+            pagespeedRepository = get()
+        )
+    }
+
+    single {
+        ReportsViewModel(
+            getDomainPageSpeedReportUseCase = get(),
+            getSitemapPathsPageSpeedReportUseCase = get(),
+            getReportsPathsUseCase = get(),
+            openReportUseCase = get()
+        )
+    }
+
     single<PagespeedSource> {
         PagespeedDataSourceImpl(
             client = get(),
+            settingsDataStore = get(),
         )
     }
 
     single<PagespeedRepository> {
         PagespeedRepositoryImpl(
-            pagespeedSource = get()
+            pagespeedSource = get(),
+            reportDataSource = get()
         )
+    }
+
+    single<ReportDataSource> {
+        ReportDataSourceLocal()
     }
 
     single<SitemapRepository> {

@@ -36,8 +36,11 @@ slf4j = "1.7.30"
 postgres = "42.7.7"
 dotenv = "6.5.1"
 windowSize = "0.5.0"
+filekit = "0.10.0"
 
 [libraries]
+composeapp-compose-common-filekit = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+composeapp-core-common-filekit = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 jvm-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version.ref = "datetime" }
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }
 server-exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "expose"}

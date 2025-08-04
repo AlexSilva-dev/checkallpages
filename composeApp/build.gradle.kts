@@ -14,6 +14,13 @@ plugins {
 }
 
 kotlin {
+    compilerOptions {
+        if (System.getProperty("idea.active") == "true") {
+            println("Enable coroutine debugging")
+            freeCompilerArgs = listOf("-Xdebug")
+        }
+    }
+
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -64,9 +71,12 @@ kotlin {
         }
 
         commonMain.dependencies {
+            implementation("io.matthewnelson.kmp-file:file:0.1.1")
+
+            implementation(libs.composeapp.compose.common.filekit)
+            implementation(libs.composeapp.core.common.filekit)
             implementation("io.github.pdvrieze.xmlutil:core:0.91.1")
             implementation("io.github.pdvrieze.xmlutil:serialization:0.90.3")
-
             implementation(libs.core.kotlinx.datetime)
             implementation(libs.core.ktor.client.logging)
             implementation(libs.core.ktor.client.serialization)
@@ -146,6 +156,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.example.template"
             packageVersion = "1.0.0"
+
+            linux {
+                modules("jdk.security.auth")
+            }
         }
     }
 }

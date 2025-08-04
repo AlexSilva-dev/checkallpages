@@ -4,7 +4,7 @@
     </string>
 
     <string name="generate_pagespeed_btn_generate_pagespeed_placeholder">
-        exemple.com.br
+       https://exemple.com/sitemap.xml
     </string>
 
     <string name="btn_generation">

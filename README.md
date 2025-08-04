@@ -1,27 +1,26 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop, Server.
+# Check All Pages
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-    - `commonMain` is for code that’s common for all targets.
-    - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-      For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-      `iosMain` would be the right folder for such calls.
+![Tela Inicial](/docs/attachments/init_screen.png)
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Esse projeto tem objetivo de automaticamente criar relatórios do PageSpeed em todas as páginas de um
+sitemap.xml, criando um relatório unificado em `.csv`, nesse relatório unificado é coletado apenas
+as métricas do Lighthouse.
 
-* `/server` is for the Ktor server application.
+## Como usar:
 
-* `/shared` is for the code that will be shared between all targets in the project.
-  The most important subfolder is `commonMain`. If preferred, you can add code to the platform-specific folders here
-  too.
+- Instale o aplicativo para seu sistema operacional
+- Ao abrir o aplicativo, no icone da engrenagem na tela de geração insira sua chave API do Google,
+  para realizar as requisições do PageSpeed.
+- Após salvar a chave API, basta encontrar o sitemap.xml do seu site, geralmente fica no caminho:
+  `https://exemple.com/sitemap.xml` ou `https://exemple.com/sitemap_index.xml`
+  Mas verifique se é seu caso.
+    - É importante que o site map, tenha de fato a lista de urls que você deseja analisar, caso eles
+      sejam xml's que apontam para outro sitemap filho, então insira a url do sitemap filho.
+        - Exemplo:
+          ![print](/docs/attachments/img.png)
+          Nesse caso, é necessário entrar no sitemap filho para poder de fato ver as urls do seu
+          site listadas.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
-
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack
-channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
-
-You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+Obs: Momentaneamente no alpha a pasta dos relatórios ficam em:
+Linux `~/.local/share/MyApplication/`
+Wind ``SCRE
