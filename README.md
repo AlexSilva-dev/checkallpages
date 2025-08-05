@@ -23,4 +23,4 @@ as métricas do Lighthouse.
 
 Obs: Momentaneamente no alpha a pasta dos relatórios ficam em:
 Linux `~/.local/share/MyApplication/`
-Wind ``SCRE
+Windows `%APPDATA%\MyApplication\`
