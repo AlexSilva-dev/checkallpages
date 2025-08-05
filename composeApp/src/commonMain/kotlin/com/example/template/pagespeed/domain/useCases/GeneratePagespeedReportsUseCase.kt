@@ -144,6 +144,7 @@ class GeneratePagespeedReportsUseCase(
     ) {
         val domain: String = UrlUtil.getDomain(urlset.url.first().loc)
         val now = Clock.System.now().toString()
+            .replace(":", "-_")
         val filePath: String = "/$domain/${sitemapUrl.path}/$now".replace(".", "-")
 
         var errorLimit: Int = 0
