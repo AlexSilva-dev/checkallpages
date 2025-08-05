@@ -24,3 +24,6 @@ as métricas do Lighthouse.
 Obs: Momentaneamente no alpha a pasta dos relatórios ficam em:
 Linux `~/.local/share/MyApplication/`
 Windows `%APPDATA%\MyApplication\`
+
+Referência para adiquiri a chave API do Google
+https://developers.google.com/speed/docs/insights/v5/get-started
