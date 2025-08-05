@@ -172,7 +172,9 @@ class ReportDataSourceLocal : ReportDataSource {
             PlatformFileManager.listFolders(platform)
         return folders.map {
             ReportPathsPageSpeed(
-                name = it.name.replace("-", "."),
+                name = it.name
+                    .replace("-_", ":")
+                    .replace("-", "."),
                 path = it.toString(),
                 atCreate = ""
             )
@@ -185,6 +187,7 @@ class ReportDataSourceLocal : ReportDataSource {
         )
         val pathNew = path
             .replace(platform.toString(), "")
+            .replace(":", "-_")
             .replace(".", "-")
 
         platform = platform.resolve(pathNew)
