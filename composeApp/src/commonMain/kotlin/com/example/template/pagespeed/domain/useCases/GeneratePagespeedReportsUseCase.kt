@@ -11,6 +11,12 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 
+sealed interface ProgressEvent {
+    data class Started(val totalUrls: List<String>) : ProgressEvent
+    data class UrlProcessing(val url: String) : ProgressEvent
+    data class UrlFinished(val url: String, val isSuccess: Boolean) : ProgressEvent
+}
+
 class GeneratePagespeedReportsUseCase(
     private val pagespeedRepository: PagespeedRepository,
     private val sitemapRepository: SitemapRepository,
@@ -20,7 +26,10 @@ class GeneratePagespeedReportsUseCase(
      * Função principal para iniciar o processo de geração de relatórios.
      */
     @OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
-    suspend fun execute(baseUrlString: String) {
+    suspend fun execute(
+        baseUrlString: String,
+        onProgress: ((ProgressEvent) -> Unit)? = null
+    ) {
         val sitemapUrl: Url? = buildUrl(baseUrlString)
         if (sitemapUrl == null) {
             println("Invalid base URL provided. Aborting report generation.")
@@ -34,7 +43,8 @@ class GeneratePagespeedReportsUseCase(
 
         this.generateReportsForUrls(
             urlset = urlset,
-            sitemapUrl = sitemapUrl
+            sitemapUrl = sitemapUrl,
+            onProgress = onProgress
         )
 
         println("PageSpeed report generation completed.")
@@ -140,16 +150,22 @@ class GeneratePagespeedReportsUseCase(
     @OptIn(ExperimentalTime::class)
     private suspend fun generateReportsForUrls(
         urlset: Urlset,
-        sitemapUrl: Url
+        sitemapUrl: Url,
+        onProgress: ((ProgressEvent) -> Unit)? = null
     ) {
         val domain: String = UrlUtil.getDomain(urlset.url.first().loc)
         val now = Clock.System.now().toString()
             .replace(":", "-_")
         val filePath: String = "/$domain/${sitemapUrl.path}/$now".replace(".", "-")
 
+        // Notifica o início com a lista total de URLs
+        onProgress?.invoke(ProgressEvent.Started(urlset.url.map { it.loc }))
+
         var errorLimit: Int = 0
         urlset.url.forEach { pageUrl ->
             println("Processando: ${pageUrl.loc}")
+            onProgress?.invoke(ProgressEvent.UrlProcessing(pageUrl.loc))
+
             try {
                 val reportResult: ReportResult = pagespeedRepository.generateReport(
                     url = pageUrl.loc
@@ -158,12 +174,15 @@ class GeneratePagespeedReportsUseCase(
                     reportResult = reportResult,
                     dirId = filePath
                 )
+                onProgress?.invoke(ProgressEvent.UrlFinished(pageUrl.loc, true))
 
             } catch (e: ApiKeyNotFoundException) {
+                onProgress?.invoke(ProgressEvent.UrlFinished(pageUrl.loc, false))
                 throw e
             } catch (e: Exception) {
                 println("Failed to generate report for ${pageUrl}: ${e.message}")
                 println(e.stackTraceToString())
+                onProgress?.invoke(ProgressEvent.UrlFinished(pageUrl.loc, false))
                 errorLimit = errorLimit.inc()
                 println("\n\n$errorLimit")
                 if (errorLimit > (urlset.url.size / 4)) throw e

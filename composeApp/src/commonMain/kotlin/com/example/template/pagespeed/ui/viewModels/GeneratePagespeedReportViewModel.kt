@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.template.app.infrastructure.dataSources.SettingsDataStore
 import com.example.template.app.utils.API_KEY_SETTING_KEY
 import com.example.template.app.viewModels.UiState
-import com.example.template.pagespeed.Exceptions.ApiKeyNotFoundException
+import com.example.template.pagespeed.domain.session.ReportGenerationSession
 import com.example.template.pagespeed.domain.useCases.GeneratePagespeedReportsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +15,18 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
+
+enum class AnalysisStatus {
+    WAITING,
+    PROCESSING,
+    COMPLETED,
+    ERROR
+}
+
+data class PageAnalysisState(
+    val url: String,
+    val status: AnalysisStatus = AnalysisStatus.WAITING
+)
 
 data class GeneratePagespeedReportData @OptIn(
     ExperimentalUuidApi::class,
@@ -26,15 +38,18 @@ data class GeneratePagespeedReportData @OptIn(
 
 class GeneratePagespeedReportViewModel(
     private val generatePagespeedReportsUseCase: GeneratePagespeedReportsUseCase,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val reportGenerationSession: ReportGenerationSession
 ) : ViewModel(), KoinComponent {
     private val _generatePagespeedReportData =
         MutableStateFlow<GeneratePagespeedReportData>(GeneratePagespeedReportData())
     val generatePagespeedReportData: StateFlow<GeneratePagespeedReportData> =
         _generatePagespeedReportData.asStateFlow()
 
-    private val _reportGenerationState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
-    val reportGeneration = this._reportGenerationState.asStateFlow()
+    // Delega o estado para a sessão
+    val generationProgress = reportGenerationSession.progress
+    val isGenerating = reportGenerationSession.isGenerating
+    val sessionError = reportGenerationSession.error
 
     init {
         viewModelScope.launch {
@@ -82,32 +97,13 @@ class GeneratePagespeedReportViewModel(
     }
 
     fun onGenerateReports() {
-        if (this._reportGenerationState.value is UiState.Loading) return
-
-        viewModelScope.launch {
-            this@GeneratePagespeedReportViewModel._reportGenerationState.value = UiState.Loading
-            try {
-                val result =
-                    this@GeneratePagespeedReportViewModel.generatePagespeedReportsUseCase.execute(
-                        baseUrlString = this@GeneratePagespeedReportViewModel._generatePagespeedReportData.value.url,
-                    )
-                this@GeneratePagespeedReportViewModel._reportGenerationState.value =
-                    UiState.Success(Unit)
-            } catch (e: ApiKeyNotFoundException) {
-
-                this@GeneratePagespeedReportViewModel._reportGenerationState.value =
-                    UiState.Error(message = "Chave da API do Google está vazia.")
-            } catch (e: Exception) {
-                this@GeneratePagespeedReportViewModel._reportGenerationState.value =
-                    UiState.Error(e.message)
-            }
-        }
+        reportGenerationSession.startGeneration(
+            url = _generatePagespeedReportData.value.url,
+            apiKey = _generatePagespeedReportData.value.apiKeyGoogle.ifBlank { null }
+        )
     }
 
-    /**
-     * Action for state reset
-     */
-    fun onReportGenerationActionCompleted() {
-        this._reportGenerationState.value = UiState.Idle
+    fun clearSession() {
+        reportGenerationSession.clearSession()
     }
 }
