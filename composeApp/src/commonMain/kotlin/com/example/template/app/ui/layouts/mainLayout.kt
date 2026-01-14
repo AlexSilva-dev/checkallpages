@@ -1,12 +1,6 @@
 package com.example.template.app.ui.layouts
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -60,7 +54,6 @@ fun MainLayout(
                                 .weight(1f) // Ocupa todo o espaço disponível
                                 .padding(20.dp)
                                 .clip(shape = MaterialTheme.shapes.large)
-                                .background(color = MaterialTheme.colorScheme.secondary)
                         ) {
                             content()
                         }
@@ -78,7 +71,6 @@ fun MainLayout(
                                     .weight(1f) // Ocupa todo o espaço disponível
                                     .padding(20.dp)
                                     .clip(shape = MaterialTheme.shapes.large)
-                                    .background(color = MaterialTheme.colorScheme.secondary)
                             ) {
                                 content()
                             }
@@ -96,7 +88,6 @@ fun MainLayout(
                                         .weight(1f) // Ocupa todo o espaço disponível
                                         .padding(20.dp)
                                         .clip(shape = MaterialTheme.shapes.large)
-                                        .background(color = MaterialTheme.colorScheme.secondary)
                                 ) {
                                     content()
                                 }

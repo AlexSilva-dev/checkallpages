@@ -1,26 +1,17 @@
 package com.example.template.pagespeed.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.ScrollbarAdapter
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -272,57 +263,76 @@ private fun Reports(
                             reportPathsPageSpeed.path
                         )
                     )
-                    LazyColumn(
+                    val state = rememberLazyListState()
+                    Box(
                         modifier = Modifier
-                            .wrapContentHeight()
-                            .heightIn(max = 100.dp)
+                            .fillMaxWidth()
+                            .heightIn(max = 200.dp)
                     ) {
-                        items(
-                            reportsViewModel.reportsViewModelData.value.reportPaths.getValue(
-                                reportPathsPageSpeed.path
-                            )
-                        ) { reportPathsPageSpeed: ReportPathsPageSpeed ->
+                        LazyColumn(
+                            state = state,
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .padding(end = 12.dp)
+                        ) {
+                            items(
+                                reportsViewModel.reportsViewModelData.value.reportPaths.getValue(
+                                    reportPathsPageSpeed.path
+                                )
+                            ) { reportPathsPageSpeed: ReportPathsPageSpeed ->
 
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                 ) {
-                                    Card(
-                                        onClick = {
-                                            reportsViewModel.onOpenFile(
-                                                reportPathsPageSpeed.path
-                                            )
-                                        },
+                                    Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                     ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .padding(
-                                                    8.dp
+                                        Card(
+                                            onClick = {
+                                                reportsViewModel.onOpenFile(
+                                                    reportPathsPageSpeed.path
                                                 )
-                                                .fillMaxSize()
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
                                         ) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier
+                                                    .padding(
+                                                        8.dp
+                                                    )
+                                                    .fillMaxSize()
+                                            ) {
 
-                                            AppText(
-                                                reportPathsPageSpeed.name
-                                            )
-                                            AppText(
-                                                text = reportPathsPageSpeed.atCreate,
-                                                fontSize = MaterialTheme.typography.labelSmall.fontSize
-                                            )
+                                                AppText(
+                                                    reportPathsPageSpeed.name
+                                                )
+                                                AppText(
+                                                    text = reportPathsPageSpeed.atCreate,
+                                                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                        VerticalScrollbar(
+                            adapter = ScrollbarAdapter(
+                                scrollState = state
+                            ),
+                            style = LocalScrollbarStyle.current.copy(
+                                unhoverColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                hoverColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .fillMaxHeight()
+                        )
                     }
-
 
                 }
 
