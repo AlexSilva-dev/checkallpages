@@ -141,3 +141,95 @@ compose.desktop {
         }
     }
 }
+
+// Classe de tarefa personalizada para garantir injeção correta e compatibilidade com cache
+abstract class CreateAppImageTask : DefaultTask() {
+    @get:Inject
+    abstract val fs: FileSystemOperations
+
+    @get:Inject
+    abstract val execOps: ExecOperations
+
+    @get:InputDirectory
+    abstract val sourceAppDir: DirectoryProperty
+
+    @get:InputFile
+    abstract val iconFile: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outputImage: RegularFileProperty
+
+    @get:Internal
+    abstract val workDir: DirectoryProperty
+
+    @TaskAction
+    fun action() {
+        val appDir = workDir.get().dir("AppDir").asFile
+        val usrDir = File(appDir, "usr")
+        
+        println("Building AppImage...")
+
+        // 1. Limpar e criar estrutura
+        if (workDir.get().asFile.exists()) workDir.get().asFile.deleteRecursively()
+        appDir.mkdirs()
+        usrDir.mkdirs()
+
+        // 2. Copiar binários
+        fs.copy {
+            from(sourceAppDir)
+            into(usrDir)
+        }
+
+        // 3. Copiar ícone
+        fs.copy {
+            from(iconFile)
+            into(appDir)
+            rename { "checkallpages.png" }
+        }
+
+        // 4. Criar script AppRun
+        val appRun = File(appDir, "AppRun")
+        appRun.writeText("""
+            #!/bin/sh
+            cd "${'$'}(dirname "${'$'}0")"
+            exec ./usr/bin/CheckAllPages "${'$'}@"
+        """.trimIndent())
+        appRun.setExecutable(true)
+
+        // 5. Criar arquivo .desktop
+        File(appDir, "checkallpages.desktop").writeText("""
+            [Desktop Entry]
+            Name=CheckAllPages
+            Exec=AppRun
+            Icon=checkallpages
+            Type=Application
+            Categories=Utility;
+        """.trimIndent())
+
+        // 6. Rodar appimagetool
+        execOps.exec {
+            commandLine("appimagetool", appDir.absolutePath, outputImage.get().asFile.absolutePath)
+        }
+
+        println("AppImage successfully created at: ${outputImage.get().asFile.absolutePath}")
+    }
+}
+
+// Registro da tarefa
+tasks.register<CreateAppImageTask>("createAppImage") {
+    group = "distribution"
+    description = "Creates a standalone .AppImage file for Linux using appimagetool"
+
+    // Só executa se for Linux
+    onlyIf { org.gradle.internal.os.OperatingSystem.current().isLinux }
+
+    // Depende da tarefa que gera os binários
+    dependsOn("packageReleaseAppImage")
+
+    // Configuração dos Inputs/Outputs
+    val buildDir = layout.buildDirectory
+    sourceAppDir.set(buildDir.dir("compose/binaries/main-release/app/CheckAllPages"))
+    workDir.set(buildDir.dir("tmp_appimage"))
+    outputImage.set(buildDir.file("CheckAllPages.AppImage"))
+    iconFile.set(layout.projectDirectory.file("src/commonMain/composeResources/drawable/logo_png.png"))
+}
