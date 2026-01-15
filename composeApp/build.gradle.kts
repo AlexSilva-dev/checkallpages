@@ -79,6 +79,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         desktopMain.dependencies {
+            implementation(compose.components.resources)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
         }
@@ -130,10 +131,12 @@ compose.desktop {
 
             linux {
                 modules("jdk.security.auth")
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/logo_png.png"))
             }
             windows {
                 // Configurações específicas para Windows
                 shortcut = true // Cria atalho no Menu Iniciar
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/logo_ico.ico"))
             }
         }
     }
