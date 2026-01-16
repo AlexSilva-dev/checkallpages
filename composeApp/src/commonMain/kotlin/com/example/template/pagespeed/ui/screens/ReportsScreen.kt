@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -155,16 +154,14 @@ private fun SitemapList(
                     }
                 }
 
-                is List<ReportPathsPageSpeed> -> {
-                    LazyColumn(
+                else -> {
+                    Column(
                         modifier = Modifier
                             .wrapContentHeight()
                     ) {
-                        items(
-                            reportsViewModel.reportsViewModelData.value.sitemapPaths.getValue(
-                                reportPathsPageSpeed.path
-                            )
-                        ) { reportPathsPageSpeed: ReportPathsPageSpeed ->
+                        reportsViewModel.reportsViewModelData.value.sitemapPaths.getValue(
+                            reportPathsPageSpeed.path
+                        ).forEach { reportPathsPageSpeed: ReportPathsPageSpeed ->
 
                             var openReport by remember {
                                 mutableStateOf(
@@ -173,11 +170,11 @@ private fun SitemapList(
                             }
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .wrapContentHeight()
                             ) {
                                 Column(
                                     modifier = Modifier
-                                        .fillMaxWidth()
+                                        .wrapContentHeight()
                                 ) {
                                     Card(
                                         onClick = {
@@ -187,7 +184,7 @@ private fun SitemapList(
                                             openReport = !openReport
                                         },
                                         modifier = Modifier
-                                            .fillMaxWidth()
+                                            .wrapContentHeight()
                                     ) {
                                         Row(
                                             horizontalArrangement = Arrangement.Start,
@@ -196,7 +193,8 @@ private fun SitemapList(
                                                 .padding(
                                                     8.dp
                                                 )
-                                                .fillMaxSize()
+                                                .height(30.dp)
+                                                .fillMaxWidth()
                                         ) {
                                             Icon(
                                                 imageVector = if (!openReport) EvaIcons.Outline.ArrowRight else EvaIcons.Outline.ArrowDown,
@@ -220,9 +218,6 @@ private fun SitemapList(
 
 
                 }
-
-                else -> CircularProgressIndicator()
-
             }
         }
     }
@@ -256,13 +251,7 @@ private fun Reports(
                     }
                 }
 
-                is List<ReportPathsPageSpeed> -> {
-                    println(
-
-                        reportsViewModel.reportsViewModelData.value.reportPaths.getValue(
-                            reportPathsPageSpeed.path
-                        )
-                    )
+                else -> {
                     val state = rememberLazyListState()
                     Box(
                         modifier = Modifier
@@ -335,9 +324,6 @@ private fun Reports(
                     }
 
                 }
-
-                else -> CircularProgressIndicator()
-
             }
         }
     }

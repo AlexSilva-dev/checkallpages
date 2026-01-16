@@ -1,17 +1,6 @@
 package com.example.template.pagespeed.infrastructure.dataSources.local
 
-import com.example.template.app.utils.DateStyle
-import com.example.template.app.utils.PlatformFileManager
-import com.example.template.app.utils.TimeStyle
-import com.example.template.app.utils.UrlUtil
-import com.example.template.app.utils.appendString
-import com.example.template.app.utils.createDirectories
-import com.example.template.app.utils.exists
-import com.example.template.app.utils.formatDate
-import com.example.template.app.utils.formatTime
-import com.example.template.app.utils.openFileWithSystemDefault
-import com.example.template.app.utils.resolve
-import com.example.template.app.utils.writeString
+import com.example.template.app.utils.*
 import com.example.template.pagespeed.domain.entities.Category
 import com.example.template.pagespeed.domain.entities.ReportPathsPageSpeed
 import com.example.template.pagespeed.domain.entities.ReportResult
@@ -170,6 +159,7 @@ class ReportDataSourceLocal : ReportDataSource {
         platform = platform.resolve(pathNew)
         val folders: List<PlatformFile> =
             PlatformFileManager.listFolders(platform)
+                .sortedByDescending { it.name }
         return folders.map {
             ReportPathsPageSpeed(
                 name = it.name
